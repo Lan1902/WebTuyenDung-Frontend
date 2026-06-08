@@ -11,17 +11,17 @@ const fallbackJob: JobPosting = {
   title: 'Frontend Developer React/Next.js',
   description:
     'Xây dựng giao diện tuyển dụng hiện đại, tối ưu trải nghiệm người dùng, tốc độ tải trang và khả năng mở rộng component.',
-  company_id: 'GoTuyenDung Studio',
-  salary_min: 20000000,
-  salary_max: 35000000,
+  companyId: 'GoTuyenDung Studio',
+  salaryMin: 20000000,
+  salaryMax: 35000000,
   location: 'Ho Chi Minh City',
-  job_type: 'Full-time',
-  experience_level: 'Mid-level',
-  skills_required: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-  applications_count: 18,
-  is_active: true,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  jobType: 'Full-time',
+  experienceLevel: 'Mid-level',
+  skillsRequired: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
+  applicationsCount: 18,
+  isActive: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
 const relatedJobs = [
@@ -83,10 +83,10 @@ export default function JobDetailPage() {
 
   const jobMeta = useMemo(
     () => [
-      { label: 'Loại công việc', value: job.job_type },
-      { label: 'Kinh nghiệm', value: job.experience_level },
+      { label: 'Loại công việc', value: job.jobType },
+      { label: 'Kinh nghiệm', value: job.experienceLevel },
       { label: 'Địa điểm', value: job.location },
-      { label: 'Mức lương', value: formatSalary(job.salary_min, job.salary_max) },
+      { label: 'Mức lương', value: formatSalary(job.salaryMin, job.salaryMax) },
     ],
     [job]
   );
@@ -137,15 +137,15 @@ export default function JobDetailPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
             <article className="card-surface p-6 sm:p-8">
               <div className="flex flex-wrap gap-2">
-                <span className="chip">{job.job_type}</span>
-                <span className="chip">{job.experience_level}</span>
-                <span className="chip text-emerald-700">{job.is_active ? 'Đang tuyển' : 'Tạm dừng'}</span>
+                <span className="chip">{job.jobType}</span>
+                <span className="chip">{job.experienceLevel}</span>
+                <span className="chip text-emerald-700">{job.isActive ? 'Đang tuyển' : 'Tạm dừng'}</span>
               </div>
 
               <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{job.title}</h1>
-              <p className="mt-3 text-base font-semibold text-emerald-600">{job.company_id}</p>
+              <p className="mt-3 text-base font-semibold text-emerald-600">{job.companyId}</p>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Mã công việc #{job.id} · {job.applications_count} ứng viên đã nộp hồ sơ
+                Mã công việc #{job.id} · {job.applicationsCount} ứng viên đã nộp hồ sơ
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -165,7 +165,7 @@ export default function JobDetailPage() {
               <div className="mt-8">
                 <h2 className="text-xl font-bold text-slate-950">Kỹ năng yêu cầu</h2>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {job.skills_required.map((skill) => (
+                  {job.skillsRequired.map((skill) => (
                     <span key={skill} className="chip">
                       {skill}
                     </span>
@@ -198,7 +198,7 @@ export default function JobDetailPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-slate-500">Ứng tuyển nhanh</p>
-                    <h2 className="mt-1 text-2xl font-bold text-slate-950">{formatSalary(job.salary_min, job.salary_max)}</h2>
+                    <h2 className="mt-1 text-2xl font-bold text-slate-950">{formatSalary(job.salaryMin, job.salaryMax)}</h2>
                   </div>
                   <div className="rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
                     Nổi bật
@@ -227,7 +227,7 @@ export default function JobDetailPage() {
                     </div>
                     <div className="flex items-center justify-between gap-4">
                       <span>Hình thức</span>
-                      <span className="font-semibold text-slate-950">{job.job_type}</span>
+                      <span className="font-semibold text-slate-950">{job.jobType}</span>
                     </div>
                     <div className="flex items-center justify-between gap-4">
                       <span>Địa điểm</span>
@@ -244,7 +244,7 @@ export default function JobDetailPage() {
                     🏢
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-slate-950">{job.company_id}</h3>
+                    <h3 className="text-lg font-bold text-slate-950">{job.companyId}</h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Doanh nghiệp công nghệ tập trung vào trải nghiệm tuyển dụng, sản phẩm số và tăng trưởng bền vững.
                     </p>

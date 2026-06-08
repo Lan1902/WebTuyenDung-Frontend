@@ -145,11 +145,11 @@ export default function CompaniesPage() {
               >
                 <div className="flex items-center mb-4">
                   <img
-                    src={company.logoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encencodeURIComponent(company.name)}`}
+                    src={(company as any).logoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(company.name)}`}
                     alt={company.name}
                     className="h-12 w-12 rounded-lg mr-3"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${encencodeURIComponent(company.name)}`;
+                      (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
                     }}
                   />
                   <div>

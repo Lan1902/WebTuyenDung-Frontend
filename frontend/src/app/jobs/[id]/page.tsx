@@ -21,7 +21,6 @@ const fallbackJob: JobPosting = {
   applicationsCount: 18,
   isActive: true,
   createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
 };
 
 const relatedJobs = [

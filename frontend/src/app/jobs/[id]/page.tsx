@@ -6,23 +6,24 @@ import Link from 'next/link';
 import { applicationApi, jobApi } from '@/lib/api';
 import { JobPosting } from '@/types';
 
-const fallbackJob: JobPosting = {
-  id: '1',
-  title: 'Frontend Developer React/Next.js',
-  description:
-    'Xây dựng giao diện tuyển dụng hiện đại, tối ưu trải nghiệm người dùng, tốc độ tải trang và khả năng mở rộng component.',
-  companyId: 'GoTuyenDung Studio',
-  salaryMin: 20000000,
-  salaryMax: 35000000,
-  location: 'Ho Chi Minh City',
-  jobType: 'Full-time',
-  experienceLevel: 'Mid-level',
-  skillsRequired: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-  applicationsCount: 18,
-  isActive: true,
-  createdAt: new Date().toISOString(),
-};
-
+const mockJobs: JobPosting[] = [
+    {
+      id: '1',
+      title: 'Frontend Developer React/Next.js',
+      description: 'Xây dựng giao diện tuyển dụng hiện đại, tối ưu trải nghiệm người dùng và hiệu năng.',
+      companyId: 'company-1',
+      salaryMin: 20000000,
+      salaryMax: 35000000,
+      location: 'Ho Chi Minh City',
+      jobType: 'Full-time',
+      experienceLevel: 'Mid-level',
+      skillsRequired: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
+      applicationsCount: 18,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      // updatedAt: new Date().toISOString() // Bo NHỚ XÓA hoặc COMMENT dòng updatedAt này nhé!
+    },
+];
 const relatedJobs = [
   {
     id: '2',

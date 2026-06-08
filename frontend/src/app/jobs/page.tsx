@@ -20,65 +20,61 @@ const fallbackJobs: JobPosting[] = [
     id: '1',
     title: 'Frontend Developer React/Next.js',
     description: 'Xây dựng giao diện tuyển dụng hiện đại, tối ưu trải nghiệm người dùng và hiệu năng.',
-    company_id: 'company-1',
-    salary_min: 20000000,
-    salary_max: 35000000,
+    companyId: 'company-1',
+    salaryMin: 20000000,
+    salaryMax: 35000000,
     location: 'Ho Chi Minh City',
-    job_type: 'Full-time',
-    experience_level: 'Mid-level',
-    skills_required: ['React', 'Next.js', 'TypeScript'],
-    applications_count: 18,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    jobType: 'Full-time',
+    experienceLevel: 'Mid-level',
+    skillsRequired: ['React', 'Next.js', 'TypeScript'],
+    applicationsCount: 18,
+    isActive: true,
+    createdAt: new Date().toISOString(),
   },
   {
     id: '2',
     title: 'Product Marketing Specialist',
     description: 'Phối hợp team sản phẩm, xây dựng chiến dịch tăng trưởng và nội dung chuyển đổi.',
-    company_id: 'company-2',
-    salary_min: 18000000,
-    salary_max: 28000000,
+    companyId: 'company-2',
+    salaryMin: 18000000,
+    salaryMax: 28000000,
     location: 'Hà Nội',
-    job_type: 'Hybrid',
-    experience_level: 'Mid-level',
-    skills_required: ['SEO', 'Content', 'Analytics'],
-    applications_count: 12,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    jobType: 'Hybrid',
+    experienceLevel: 'Mid-level',
+    skillsRequired: ['SEO', 'Content', 'Analytics'],
+    applicationsCount: 12,
+    isActive: true,
+    createdAt: new Date().toISOString(),
   },
   {
     id: '3',
     title: 'UI/UX Designer',
     description: 'Thiết kế hệ thống giao diện, prototype và trải nghiệm người dùng cho sản phẩm số.',
-    company_id: 'company-3',
-    salary_min: 15000000,
-    salary_max: 25000000,
+    companyId: 'company-3',
+    salaryMin: 15000000,
+    salaryMax: 25000000,
     location: 'Đà Nẵng',
-    job_type: 'Remote',
-    experience_level: 'Mid-level',
-    skills_required: ['Figma', 'Design System', 'Prototyping'],
-    applications_count: 9,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    jobType: 'Remote',
+    experienceLevel: 'Mid-level',
+    skillsRequired: ['Figma', 'Design System', 'Prototyping'],
+    applicationsCount: 9,
+    isActive: true,
+    createdAt: new Date().toISOString(),
   },
   {
     id: '4',
     title: 'HR Executive',
     description: 'Tuyển dụng, phỏng vấn, onboarding và đồng hành cùng trải nghiệm nhân sự.',
-    company_id: 'company-4',
-    salary_min: 14000000,
-    salary_max: 22000000,
+    companyId: 'company-4',
+    salaryMin: 14000000,
+    salaryMax: 22000000,
     location: 'Ho Chi Minh City',
-    job_type: 'Full-time',
-    experience_level: 'Entry-level',
-    skills_required: ['Recruitment', 'Interview', 'Onboarding'],
-    applications_count: 22,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    jobType: 'Full-time',
+    experienceLevel: 'Entry-level',
+    skillsRequired: ['Recruitment', 'Interview', 'Onboarding'],
+    applicationsCount: 22,
+    isActive: true,
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -113,8 +109,8 @@ export default function JobsPage() {
 
   const options = useMemo(() => {
     const locations = Array.from(new Set(jobs.map((job) => job.location))).filter(Boolean);
-    const jobTypes = Array.from(new Set(jobs.map((job) => job.job_type))).filter(Boolean);
-    const experienceLevels = Array.from(new Set(jobs.map((job) => job.experience_level))).filter(Boolean);
+    const jobTypes = Array.from(new Set(jobs.map((job) => job.jobType))).filter(Boolean);
+    const experienceLevels = Array.from(new Set(jobs.map((job) => job.experienceLevel))).filter(Boolean);
 
     return { locations, jobTypes, experienceLevels };
   }, [jobs]);
@@ -127,21 +123,21 @@ export default function JobsPage() {
         normalizedSearch.length === 0 ||
         job.title.toLowerCase().includes(normalizedSearch) ||
         job.location.toLowerCase().includes(normalizedSearch) ||
-        job.company_id.toLowerCase().includes(normalizedSearch) ||
-        job.skills_required.some((skill) => skill.toLowerCase().includes(normalizedSearch));
+        job.companyId.toLowerCase().includes(normalizedSearch) ||
+        job.skillsRequired.some((skill) => skill.toLowerCase().includes(normalizedSearch));
 
       const matchesLocation = filters.location === 'all' || job.location === filters.location;
-      const matchesJobType = filters.jobType === 'all' || job.job_type === filters.jobType;
+      const matchesJobType = filters.jobType === 'all' || job.jobType === filters.jobType;
       const matchesExperience =
-        filters.experienceLevel === 'all' || job.experience_level === filters.experienceLevel;
+        filters.experienceLevel === 'all' || job.experienceLevel === filters.experienceLevel;
 
       return matchesSearch && matchesLocation && matchesJobType && matchesExperience;
     });
 
     return result.sort((a, b) => {
-      if (filters.sort === 'salary-high') return b.salary_max - a.salary_max;
-      if (filters.sort === 'salary-low') return a.salary_min - b.salary_min;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (filters.sort === 'salary-high') return b.salaryMax - a.salaryMax;
+      if (filters.sort === 'salary-low') return a.salaryMin - b.salaryMin;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [filters, jobs]);
 
@@ -288,25 +284,25 @@ export default function JobsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-2">
-                      <span className="chip">{job.job_type}</span>
-                      <span className="chip">{job.experience_level}</span>
+                      <span className="chip">{job.jobType}</span>
+                      <span className="chip">{job.experienceLevel}</span>
                     </div>
                     <h3 className="mt-4 text-xl font-bold text-slate-950">{job.title}</h3>
-                    <p className="mt-2 text-sm text-slate-600">Công ty: {job.company_id}</p>
+                    <p className="mt-2 text-sm text-slate-600">Công ty: {job.companyId}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span className="chip">{job.location}</span>
-                      <span className="chip text-emerald-700">{formatSalary(job.salary_min, job.salary_max)}</span>
+                      <span className="chip text-emerald-700">{formatSalary(job.salaryMin, job.salaryMax)}</span>
                     </div>
                   </div>
                   <div className="rounded-2xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white">
-                    {job.applications_count} CV
+                    {job.applicationsCount} CV
                   </div>
                 </div>
 
                 <p className="mt-5 line-clamp-3 text-sm leading-6 text-slate-600">{job.description}</p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
-                  {job.skills_required.slice(0, 4).map((skill) => (
+                  {job.skillsRequired.slice(0, 4).map((skill) => (
                     <span key={skill} className="chip">
                       {skill}
                     </span>

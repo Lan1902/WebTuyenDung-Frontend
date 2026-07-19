@@ -10,7 +10,7 @@ namespace RecruitmentAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "candidate,admin")] // Only candidates and admins can manage resumes
+[Authorize] 
 public class ResumesController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -40,23 +40,26 @@ public class ResumesController : ControllerBase
 
     // GET: api/resumes/{id} - Get a specific resume by ID
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<ActionResult<ResumeDto>> GetResume(Guid id)
     {
-        var userId = GetUserId();
-        if (userId == null) return Unauthorized();
-
+        // 1. Lấy CV từ Database (Nhớ thêm Include nếu bạn có các bảng con như Skills, Educations...)
         var resume = await _context.Resumes
-            .Include(r => r.Experiences)
-            .Include(r => r.Educations)
-            .Include(r => r.Skills)
+            // .Include(r => r.Skills) // Mở comment các dòng này nếu database của bạn có bảng con
+            // .Include(r => r.Experiences)
             .FirstOrDefaultAsync(r => r.Id == id);
 
-        if (resume == null) return NotFound(new { message = "Resume not found." });
+        if (resume == null) return NotFound();
 
-        // A01:2021 - Ownership check
-        if (resume.UserId != userId.Value && !User.IsInRole("admin"))
-        { 
-            return Forbid();
+        // 2. Lấy thông tin user đang đăng nhập
+        var userId = GetUserId();
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        // 3. LOGIC PHÂN QUYỀN MỚI: 
+        // Chỉ chặn NẾU người xem KHÔNG PHẢI chủ CV, VÀ CŨNG KHÔNG PHẢI Nhà tuyển dụng/Admin
+        if (resume.UserId != userId && role != "employer" && role != "admin")
+        {
+            return Forbid(); // Bị chặn ở đây nếu là ứng viên khác đi xem trộm CV
         }
 
         return Ok(ToDto(resume));

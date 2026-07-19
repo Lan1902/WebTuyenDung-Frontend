@@ -25,7 +25,17 @@ export default function LoginPage() {
 
       // A07:2021 - Store both access and refresh tokens
       setAuth(data.token, data.refreshToken, data.user);
-      router.push('/dashboard');
+      
+      // ĐỌC THAM SỐ REDIRECT TỪ URL (Làm bến đỗ để quay lại)
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect');
+
+      if (redirectUrl) {
+        window.location.href = redirectUrl; // Trở lại trang đang xem dở
+      } else {
+        window.location.href = '/dashboard'; // Mặc định về Dashboard
+      }
+
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setError(axiosErr.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');

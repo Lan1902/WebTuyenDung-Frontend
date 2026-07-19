@@ -27,6 +27,7 @@ public class CompaniesController : ControllerBase
             .Select(c => new CompanyDto
             {
                 Id = c.Id,
+                OwnerId = c.OwnerId,
                 Name = c.Name,
                 Description = c.Description ?? string.Empty,
                 Website = c.Website ?? string.Empty,
@@ -147,6 +148,7 @@ public class CompaniesController : ControllerBase
         return new CompanyDto
         {
             Id = c.Id,
+            OwnerId = c.OwnerId,
             Name = c.Name,
             Description = c.Description ?? string.Empty,
             Website = c.Website ?? string.Empty,

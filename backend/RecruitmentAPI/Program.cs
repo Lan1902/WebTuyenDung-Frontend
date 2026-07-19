@@ -13,8 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database - MySQL with EF Core
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+// Database - MySQL with EF Core (Tự động lấy biến môi trường nếu chạy trên Cloud)
+var connectionString = Environment.GetEnvironmentVariable("MYSQL_CONNECTION_STRING") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -100,7 +101,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // CORS must be before Auth
-app.UseCors("FrontendOnly");
+app.UseCors(builder => builder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
 app.UseAuthentication();
 app.UseAuthorization();

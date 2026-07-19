@@ -25,6 +25,7 @@ public class ApplicationsController : ControllerBase
     public async Task<ActionResult<IEnumerable<JobApplicationDto>>> GetApplications()
     {
         var userId = GetUserId();
+        
         if (userId == null)
             return Unauthorized();
 
@@ -39,10 +40,13 @@ public class ApplicationsController : ControllerBase
         };
 
         var applications = await query
-            .Select(a => ToDto(a))
+            .Include(a => a.Job)
+                .ThenInclude(j => j.Company)
+            .Include(a => a.Candidate)
+            .OrderByDescending(a => a.AppliedAt)
             .ToListAsync();
 
-        return Ok(applications);
+        return Ok(applications.Select(a => ToDto(a)));
     }
 
     // GET: api/applications/{id}
@@ -53,18 +57,14 @@ public class ApplicationsController : ControllerBase
         var userId = GetUserId();
         if (userId == null) return Unauthorized();
 
-        var application = await _context.JobApplications.FindAsync(id);
-        if (application == null)
-            return NotFound(new { message = "Đơn ứng tuyển không tồn tại." });
+        // THÊM INCLUDE ĐỂ NỐI BẢNG LẤY TÊN CÔNG TY, TÊN JOB VÀ TÊN ỨNG VIÊN
+        var application = await _context.JobApplications
+            .Include(a => a.Job)
+                .ThenInclude(j => j.Company)
+            .Include(a => a.Candidate)
+            .FirstOrDefaultAsync(a => a.Id == id);
 
-        // A01:2021 - Ownership check: candidate can see own, employer can see their job's applications, admin can see all
-        var isAdmin = User.IsInRole("admin");
-        if (!isAdmin && application.CandidateId != userId.Value)
-        {
-            var job = await _context.JobPostings.FindAsync(application.JobId);
-            if (job == null || job.AuthorId != userId.Value)
-                return Forbid();
-        }
+        if (application == null) return NotFound();
 
         return Ok(ToDto(application));
     }
@@ -186,7 +186,11 @@ public class ApplicationsController : ControllerBase
             ResumeUrl = a.ResumeUrl ?? string.Empty,
             CoverLetter = a.CoverLetter ?? string.Empty,
             Status = a.Status,
-            AppliedAt = a.AppliedAt
+            AppliedAt = a.AppliedAt,
+            // Lấy dữ liệu từ các bảng đã Join
+            JobTitle = a.Job != null ? a.Job.Title : "Công việc không xác định",
+            CompanyName = a.Job?.Company != null ? a.Job.Company.Name : "Công ty ẩn danh",
+            CandidateName = a.Candidate != null ? a.Candidate.FullName : "Ứng viên ẩn danh"
         };
     }
 }

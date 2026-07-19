@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { jobApi } from '@/lib/api';
 import { JobPosting } from '@/types';
+import ApplyButton from '@/components/ApplyButton';
 
 type SortOption = 'newest' | 'salary-high' | 'salary-low';
 
@@ -88,7 +90,22 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState(defaultFilters);
+
+  // ĐỌC THÔNG TIN TỪ URL TRANG CHỦ GỬI SANG
+  const searchParams = useSearchParams();
+  const querySearch = searchParams.get('search') || '';
+  const queryLocation = searchParams.get('location') || '';
+  const queryJobType = searchParams.get('jobType') || 'all';
+  const queryExperience = searchParams.get('experienceLevel') || 'all';
+
+  // Nạp thông tin đó vào bộ lọc mặc định
+  const [filters, setFilters] = useState({
+    ...defaultFilters,
+    search: querySearch,
+    location: queryLocation !== '' ? queryLocation : 'all',
+    jobType: queryJobType !== '' ? queryJobType : 'all',
+    experienceLevel: queryExperience !== '' ? queryExperience : 'all',
+  });
 
   useEffect(() => {
     loadJobs();
@@ -288,7 +305,7 @@ export default function JobsPage() {
                       <span className="chip">{job.experienceLevel}</span>
                     </div>
                     <h3 className="mt-4 text-xl font-bold text-slate-950">{job.title}</h3>
-                    <p className="mt-2 text-sm text-slate-600">Công ty: {job.companyId}</p>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Công ty: {(job as any).companyName || 'Công ty chưa cập nhật tên'}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span className="chip">{job.location}</span>
                       <span className="chip text-emerald-700">{formatSalary(job.salaryMin, job.salaryMax)}</span>
@@ -313,9 +330,7 @@ export default function JobsPage() {
                   <Link href={`/jobs/${job.id}`} className="btn-primary">
                     Xem chi tiết
                   </Link>
-                  <button type="button" className="btn-secondary">
-                    Ứng tuyển nhanh
-                  </button>
+                  <ApplyButton jobId={job.id} />
                 </div>
               </article>
             ))}

@@ -60,11 +60,6 @@ export default function Footer() {
                   Công ty
                 </Link>
               </li>
-              <li>
-                <Link href="/about" className="hover:text-slate-200 transition-colors">
-                  Giới thiệu
-                </Link>
-              </li>
             </ul>
           </div>
         </div>

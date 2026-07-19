@@ -24,19 +24,21 @@ public class JobsController : ControllerBase
     public async Task<ActionResult<IEnumerable<JobPostingDto>>> GetJobs()
     {
         var jobs = await _context.JobPostings
+            .Include(j => j.Company)
             .Where(j => j.IsActive)
             .OrderByDescending(j => j.CreatedAt)
-            .Select(j => ToDto(j))
             .ToListAsync();
 
-        return Ok(jobs);
+        return Ok(jobs.Select(j => ToDto(j)));
     }
 
     // GET: api/jobs/{id} - Public endpoint
     [HttpGet("{id}")]
     public async Task<ActionResult<JobPostingDto>> GetJob(Guid id)
-    {
-        var job = await _context.JobPostings.FindAsync(id);
+    {       
+        var job = await _context.JobPostings
+        .Include(j => j.Company)
+        .FirstOrDefaultAsync(j => j.Id == id);
         if (job == null || !job.IsActive)
             return NotFound(new { message = "Tin tuyển dụng không tồn tại." });
 
@@ -183,9 +185,11 @@ public class JobsController : ControllerBase
         return new JobPostingDto
         {
             Id = j.Id,
+            AuthorId = j.AuthorId,
             Title = j.Title,
             Description = j.Description,
             CompanyId = j.CompanyId,
+            CompanyName = j.Company != null ? j.Company.Name : j.CompanyId.ToString(),
             SalaryMin = j.SalaryMin,
             SalaryMax = j.SalaryMax,
             Location = j.Location,

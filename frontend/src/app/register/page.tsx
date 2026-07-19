@@ -27,11 +27,25 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
       await authApi.register(formData);
       router.push('/login?registered=true');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Đăng ký thất bại');
+      // 1. Ưu tiên bắt lỗi Validation tự động của .NET (mảng errors)
+      if (err.response?.data?.errors) {
+        // Gom tất cả các mảng lỗi thành một chuỗi duy nhất để hiển thị
+        const validationErrors = Object.values(err.response.data.errors).flat().join(' | ');
+        setError(validationErrors);
+      } 
+      // 2. Bắt lỗi logic tùy chỉnh từ Backend (biến message)
+      else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } 
+      // 3. Lỗi mạng hoặc server sập
+      else {
+        setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại Backend.');
+      }
     } finally {
       setLoading(false);
     }
@@ -121,6 +135,10 @@ export default function RegisterPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             />
+            {/* Ghi chú UX hiển thị yêu cầu mật khẩu */}
+            <p className="mt-1 text-xs text-gray-500">
+              * Tối thiểu 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+            </p>
           </div>
 
           <button

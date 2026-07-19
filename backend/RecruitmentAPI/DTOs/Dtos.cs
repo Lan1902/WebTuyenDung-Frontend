@@ -8,7 +8,7 @@ public static class InputSanitizer
     public static string Sanitize(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-        return System.Net.WebUtility.HtmlEncode(input.Trim());
+        return input.Trim();
     }
 
     public static string SanitizeHtml(string? input)
@@ -77,6 +77,8 @@ public class UserDto
 public class JobPostingDto
 {
     public Guid Id { get; set; }
+    public Guid AuthorId { get; set; }
+    public string CompanyName { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public Guid CompanyId { get; set; }
@@ -113,6 +115,10 @@ public class JobApplicationDto
     public string CoverLetter { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public DateTime AppliedAt { get; set; }
+    // 3 TRƯỜNG BỔ SUNG ĐỂ HIỂN THỊ LÊN DASHBOARD FRONTEND
+    public string? JobTitle { get; set; }
+    public string? CompanyName { get; set; }
+    public string? CandidateName { get; set; }
 }
 
 public class UpdateApplicationStatusDto
@@ -123,6 +129,7 @@ public class UpdateApplicationStatusDto
 public class CompanyDto
 {
     public Guid Id { get; set; }
+    public Guid OwnerId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Website { get; set; } = string.Empty;

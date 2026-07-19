@@ -5,25 +5,24 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { applicationApi, jobApi } from '@/lib/api';
 import { JobPosting } from '@/types';
+import ApplyButton from '@/components/ApplyButton';
 
-const mockJobs: JobPosting[] = [
-    {
-      id: '1',
-      title: 'Frontend Developer React/Next.js',
-      description: 'Xây dựng giao diện tuyển dụng hiện đại, tối ưu trải nghiệm người dùng và hiệu năng.',
-      companyId: 'company-1',
-      salaryMin: 20000000,
-      salaryMax: 35000000,
-      location: 'Ho Chi Minh City',
-      jobType: 'Full-time',
-      experienceLevel: 'Mid-level',
-      skillsRequired: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-      applicationsCount: 18,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      // updatedAt: new Date().toISOString() // Bo NHỚ XÓA hoặc COMMENT dòng updatedAt này nhé!
-    },
-];
+const fallbackJob: JobPosting = {
+  id: '1',
+  title: 'Frontend Developer React/Next.js',
+  description: 'Xây dựng giao diện tuyển dụng hiện đại, tối ưu trải nghiệm người dùng và hiệu năng.',
+  companyId: 'company-1',
+  salaryMin: 20000000,
+  salaryMax: 35000000,
+  location: 'Ho Chi Minh City',
+  jobType: 'Full-time',
+  experienceLevel: 'Mid-level',
+  skillsRequired: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
+  applicationsCount: 18,
+  isActive: true,
+  createdAt: new Date().toISOString()
+};
+
 const relatedJobs = [
   {
     id: '2',
@@ -91,23 +90,6 @@ export default function JobDetailPage() {
     [job]
   );
 
-  const handleApply = async () => {
-    setApplying(true);
-    try {
-      await applicationApi.create({
-        job_id: job.id,
-        resume_url: '',
-        cover_letter: '',
-      });
-      window.alert('Ứng tuyển thành công!');
-    } catch (err) {
-      console.error('Apply failed:', err);
-      window.alert('Ứng tuyển thất bại. Vui lòng thử lại sau.');
-    } finally {
-      setApplying(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="container-page flex min-h-[60vh] items-center justify-center">
@@ -143,7 +125,7 @@ export default function JobDetailPage() {
               </div>
 
               <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{job.title}</h1>
-              <p className="mt-3 text-base font-semibold text-emerald-600">{job.companyId}</p>
+              <p className="mt-3 text-base font-semibold text-emerald-600">{(job as any).companyName || 'Công ty chưa cập nhật tên'}</p>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 Mã công việc #{job.id} · {job.applicationsCount} ứng viên đã nộp hồ sơ
               </p>
@@ -205,18 +187,9 @@ export default function JobDetailPage() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleApply}
-                  disabled={applying}
-                  className="btn-accent mt-6 w-full"
-                >
-                  {applying ? 'Đang gửi hồ sơ...' : 'Ứng tuyển ngay'}
-                </button>
-
-                <button type="button" className="btn-secondary mt-3 w-full">
-                  Lưu việc làm
-                </button>
+                  <div className="w-full mb-3 [&>button]:w-full [&>button]:py-3">
+                    <ApplyButton jobId={job.id} />
+                  </div>
 
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Thông tin quan trọng</p>
@@ -244,7 +217,7 @@ export default function JobDetailPage() {
                     🏢
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-slate-950">{job.companyId}</h3>
+                    <h3 className="text-lg font-bold text-slate-950">{(job as any).companyName || 'Công ty chưa cập nhật tên'}</h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Doanh nghiệp công nghệ tập trung vào trải nghiệm tuyển dụng, sản phẩm số và tăng trưởng bền vững.
                     </p>

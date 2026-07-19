@@ -1,9 +1,12 @@
 // Global CSS with Tailwind
 import type { Metadata } from 'next';
 import './globals.css';
+
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ClientProviders from '@/components/ClientProviders';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'GoTuyenDung',

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+// Bổ sung thêm useEffect vào import
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { resumeApi } from "@/lib/api";
 import { useReactToPrint } from "react-to-print";
@@ -9,7 +10,6 @@ export default function CreateResumePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
-  // DỮ LIỆU GỐC ĐỂ TRỐNG
   const [formData, setFormData] = useState({
     title: "",
     fullName: "",
@@ -27,11 +27,46 @@ export default function CreateResumePage() {
     awards: "",
   });
 
-  // State lưu trữ ảnh đại diện
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
   const componentRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  // LUỒNG ĐỌC DỮ LIỆU CŨ KHI VỪA VÀO TRANG
+  useEffect(() => {
+    const fetchExistingData = async () => {
+      try {
+        // Hàm getMyResume() cần được cấu hình trong file lib/api.ts của bạn
+        const response = await resumeApi.getMyResume(); 
+        if (response && response.data) {
+          const cv = response.data;
+          setFormData({
+            title: cv.title || "",
+            fullName: cv.fullName || "",
+            jobTitle: cv.jobTitle || "",
+            email: cv.email || "",
+            phoneNumber: cv.phoneNumber || "",
+            location: cv.location || "",
+            bio: cv.bio || "",
+            skills: cv.skills || "",
+            languages: cv.languages || "",
+            education: cv.education || "",
+            experience: cv.experience || "",
+            projects: cv.projects || "",
+            certificates: cv.certificates || "",
+            awards: cv.awards || "",
+          });
+          // Nếu database có lưu ảnh đại diện (vd: cv.avatarUrl)
+          if (cv.avatarUrl) {
+             setAvatarUrl(cv.avatarUrl);
+          }
+        }
+      } catch (error) {
+        console.log("Không tìm thấy CV cũ hoặc ứng viên chưa tạo CV:", error);
+      }
+    };
+
+    fetchExistingData();
+  }, []);
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
@@ -48,7 +83,6 @@ export default function CreateResumePage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Hàm xử lý khi người dùng chọn ảnh
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -67,12 +101,19 @@ export default function CreateResumePage() {
       await resumeApi.create({
         title: formData.title,
         fullName: formData.fullName,
+        jobTitle: formData.jobTitle,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
+        location: formData.location,
         bio: formData.bio,
-        experiences: [],
-        educations: [],
-        skills: []
+        skills: formData.skills,
+        languages: formData.languages,
+        education: formData.education,
+        experience: formData.experience,
+        projects: formData.projects,
+        certificates: formData.certificates,
+        awards: formData.awards,
+        // Nếu API cho phép lưu chuỗi base64 ảnh đại diện, có thể truyền thêm avatarUrl vào đây
       });
       alert("Lưu CV thành công!");
       router.push("/dashboard");
@@ -161,7 +202,6 @@ export default function CreateResumePage() {
               </h2>
               <div className="space-y-4">
                 
-                {/* NÚT TẢI ẢNH ĐẠI DIỆN MỚI THÊM VÀO */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Ảnh đại diện (Tùy chọn)</label>
                   <input 

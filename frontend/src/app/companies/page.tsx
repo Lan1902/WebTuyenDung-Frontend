@@ -50,13 +50,7 @@ export default function CompaniesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      {/* Header đã bỏ màu xanh, text tự động đổi màu theo theme */}
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{t('companies.viewAll')}</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">{t('companies.description')}</p>
-        </div>
-      </div>
+      {/* Đã xóa hoàn toàn phần Header "Xem tất cả - Mô tả" ở đây */}
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -153,12 +147,10 @@ export default function CompaniesPage() {
                     }}
                   />
                   <div>
-                    {/* Bỏ các class dark:text-... để chữ luôn đậm trên nền trắng */}
                     <h3 className="text-xl font-bold text-gray-900">{company.name}</h3>
                     <p className="text-gray-600 font-medium text-sm">{company.industry}</p>
                   </div>
                 </div>
-                {/* Đổi màu chữ sang xám đậm (gray-700/800) để nổi bật trên nền trắng */}
                 <p className="text-gray-700 text-sm mb-2">📍 {company.location}</p>
                 <p className="text-gray-700 text-sm mb-4">👥 {company.size}</p>
                 <p className="text-gray-800 text-sm mb-4 line-clamp-2">{company.description}</p>

@@ -403,7 +403,7 @@ export default function CreateResumePage() {
                     Giải thưởng & Thành tích
                   </h3>
                   <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                    {formData.awards || "Học bổng Khuyến khích Học tập Học kỳ I (2024 - 2025)"}
+                    {formData.awards || "Học bổng Khuyến khích Học tập (2024 - 2025)"}
                   </div>
                 </section>
 

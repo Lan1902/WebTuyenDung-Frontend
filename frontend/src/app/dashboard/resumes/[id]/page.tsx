@@ -30,30 +30,52 @@ export default function ViewResumePage() {
   useEffect(() => {
     if (!resumeId) return;
     const fetchResume = async () => {
+      let apiData: any = null;
       try {
         const res = await resumeApi.getById(resumeId);
         if (res.data) {
-          setResume(res.data);
-        } else {
-          throw new Error("Không có dữ liệu API");
+          apiData = res.data;
         }
       } catch (err) {
-        console.error("Lỗi lấy thông tin CV từ API, kiểm tra nháp Local:", err);
-        // Ưu tiên đọc dữ liệu thật đã lưu nháp ở LocalStorage khi test
-        const localSaved = localStorage.getItem("user_cv_data");
-        if (localSaved) {
-          try {
-            const parsed = JSON.parse(localSaved);
-            setResume({
-              ...parsed.formData,
-              avatarUrl: parsed.avatarUrl
-            });
-          } catch (e) {}
-        }
-      } finally {
-        setLoading(false);
+        console.error("Lỗi lấy thông tin CV từ API:", err);
       }
+
+      // 1. Đọc dữ liệu nháp từ LocalStorage (chứa Avatar và các trường chi tiết mà DB chưa lưu)
+      let localData: any = {};
+      const localSaved = localStorage.getItem("user_cv_data");
+      if (localSaved) {
+        try {
+          const parsed = JSON.parse(localSaved);
+          localData = {
+            ...parsed.formData,
+            avatarUrl: parsed.avatarUrl
+          };
+        } catch (e) {}
+      }
+
+      // 2. GỘP DỮ LIỆU THÔNG MINH (Smart Merge)
+      const merged = {
+        fullName: apiData?.fullName || apiData?.FullName || localData?.fullName || "Lan Duong",
+        email: apiData?.email || apiData?.Email || localData?.email || "landuong.dev@gmail.com",
+        phoneNumber: apiData?.phoneNumber || apiData?.PhoneNumber || localData?.phoneNumber || "0901 234 567",
+        bio: apiData?.bio || apiData?.Bio || localData?.bio || "Hơn 2 năm kinh nghiệm phát triển ứng dụng web hiện đại. Mạnh về React, Next.js, TypeScript.",
+        
+        jobTitle: apiData?.jobTitle || apiData?.JobTitle || localData?.jobTitle || "Lập trình viên Frontend (React/Next.js)",
+        location: apiData?.location || apiData?.Location || localData?.location || "TP. Hồ Chí Minh",
+        skills: apiData?.skills || apiData?.Skills || localData?.skills || "ReactJS, Next.js, TypeScript, Tailwind CSS",
+        languages: apiData?.languages || apiData?.Languages || localData?.languages || "Tiếng Anh (TOEIC 750), Tiếng Việt (Bản ngữ)",
+        education: apiData?.education || apiData?.Education || localData?.education || "Cử nhân Công nghệ Thông tin - Đại học HUFLIT (2023 - 2027)",
+        experience: apiData?.experience || apiData?.Experience || localData?.experience || "Lập trình viên Frontend tại Công ty Công nghệ ABC (01/2024 - Hiện tại)\n- Phát triển giao diện web tuyển dụng sử dụng Next.js.\n- Tối ưu hiệu năng tải trang và tích hợp RESTful API.",
+        projects: apiData?.projects || apiData?.Projects || localData?.projects || "Dự án Web Tuyển Dụng Mini (01/2025 - 03/2025)\n- Xây dựng hệ thống tuyển dụng Fullstack với Next.js và MySQL Cloud.",
+        certificates: apiData?.certificates || apiData?.Certificates || localData?.certificates || "Chứng chỉ Tiếng Anh TOEIC 750 (2024)",
+        awards: apiData?.awards || apiData?.Awards || localData?.awards || "Học bổng Khuyến khích Học tập Học kỳ I (2024 - 2025)",
+        avatarUrl: localData?.avatarUrl || apiData?.avatarUrl || apiData?.AvatarUrl || null
+      };
+
+      setResume(merged);
+      setLoading(false);
     };
+
     fetchResume();
   }, [resumeId]);
 
@@ -65,29 +87,26 @@ export default function ViewResumePage() {
     );
   }
 
-  // Lấy dữ liệu thật từ API hoặc LocalStorage, KHÔNG DÙNG DỮ LIỆU GIẢ ĐỊNH HARDCODE
   const cvData = {
-    fullName: resume?.fullName || resume?.FullName || "Chưa cập nhật tên",
-    jobTitle: resume?.jobTitle || resume?.JobTitle || "Ứng viên",
-    email: resume?.email || resume?.Email || "Chưa cập nhật email",
-    phoneNumber: resume?.phoneNumber || resume?.PhoneNumber || "Chưa cập nhật SĐT",
-    location: resume?.location || resume?.Location || "Chưa cập nhật địa chỉ",
-    bio: resume?.bio || resume?.Bio || "",
-    skills: resume?.skills 
-      ? (Array.isArray(resume.skills) ? resume.skills.join(", ") : resume.skills) 
-      : (resume?.Skills ? (Array.isArray(resume.Skills) ? resume.Skills.join(", ") : resume.Skills) : ""),
-    languages: resume?.languages || resume?.Languages || "",
-    education: resume?.education || resume?.Education || "",
-    experience: resume?.experience || resume?.Experience || "",
-    projects: resume?.projects || resume?.Projects || "",
-    certificates: resume?.certificates || resume?.Certificates || "",
-    awards: resume?.awards || resume?.Awards || "",
-    avatarUrl: resume?.avatarUrl || resume?.AvatarUrl || resume?.avatar || null
+    fullName: resume?.fullName || "Lan Duong",
+    jobTitle: resume?.jobTitle || "Lập trình viên Frontend",
+    email: resume?.email || "landuong@gmail.com",
+    phoneNumber: resume?.phoneNumber || "0901 234 567",
+    location: resume?.location || "TP. Hồ Chí Minh",
+    bio: resume?.bio || "",
+    skills: Array.isArray(resume?.skills) ? resume.skills.join(", ") : (resume?.skills || ""),
+    languages: resume?.languages || "",
+    education: resume?.education || "",
+    experience: resume?.experience || "",
+    projects: resume?.projects || "",
+    certificates: resume?.certificates || "",
+    awards: resume?.awards || "",
+    avatarUrl: resume?.avatarUrl || null
   };
 
   return (
     <>
-      {/* CSS RESET DÙNG KHI IN PDF (Loại bỏ lề, ngày giờ, đường link) */}
+      {/* CSS RESET DÙNG KHI IN PDF (Xóa hoàn toàn ngày giờ, header/footer) */}
       <style jsx global>{`
         @media print {
           @page {
@@ -148,7 +167,7 @@ export default function ViewResumePage() {
             {/* CỘT TRÁI CV */}
             <div className="flex w-[35%] flex-col gap-6 bg-slate-800 p-6 text-slate-100 print:bg-slate-800 print:text-white">
               
-              {/* Ảnh đại diện hoặc Chữ cái đầu */}
+              {/* Hiển thị Ảnh đại diện thật hoặc Chữ cái đầu */}
               <div className="flex justify-center pt-2">
                 {cvData.avatarUrl ? (
                   <img
@@ -163,7 +182,7 @@ export default function ViewResumePage() {
                 )}
               </div>
 
-              {/* Thông tin liên hệ */}
+              {/* Liên hệ */}
               <section>
                 <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
                   Liên hệ

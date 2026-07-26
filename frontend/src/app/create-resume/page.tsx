@@ -96,27 +96,48 @@ export default function CreateResumePage() {
   // 2. LƯU CV VÀO CẢ LOCALSTORAGE LẪN DATABASE
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Kiểm tra xem đã nhập tên chưa
+    if (!formData.fullName || !formData.email) {
+      alert("Vui lòng nhập ít nhất Họ Tên và Email!");
+      return;
+    }
+
     setLoading(true);
 
-    // Lưu vào LocalStorage
+    // 1. Vẫn lưu dự phòng vào LocalStorage
     localStorage.setItem("user_cv_data", JSON.stringify({ formData, avatarUrl }));
 
+    // 2. Gửi dữ liệu thật lên Database
     try {
       await resumeApi.create({
-        title: formData.title || "CV Cá Nhân",
+        title: formData.title || `CV của ${formData.fullName}`,
         fullName: formData.fullName,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
-        bio: formData.bio,
-        experiences: [],
+        bio: formData.bio || "",
+        // Nếu backend của bạn yêu cầu mảng, ta gửi mảng rỗng để tránh lỗi
+        experiences: [], 
         educations: [],
         skills: []
       });
-      alert("Lưu CV thành công! Lần sau truy cập dữ liệu sẽ tự động được tải lại.");
-      router.push("/dashboard");
+      
+      alert("🎉 Lưu CV lên hệ thống thành công! Bây giờ bạn có thể đi ứng tuyển.");
+      router.push("/jobs"); // Chuyển thẳng ra trang tìm việc
+      
     } catch (error: any) {
-      // Nếu API báo lỗi vẫn báo lưu local thành công
-      alert("Đã lưu bản nháp CV vào máy!");
+      console.error("Lỗi chi tiết khi lưu CV:", error);
+      
+      // Bắt đúng lỗi từ Backend trả về để biết tại sao thất bại
+      const errorMsg = error.response?.data?.message || error.message || "Lỗi không xác định";
+      
+      if (error.response?.status === 401) {
+        alert("Bạn chưa đăng nhập! Vui lòng đăng nhập với vai trò Ứng viên trước khi lưu CV.");
+      } else if (error.response?.status === 403) {
+        alert("Tài khoản của bạn không có quyền tạo CV (Có thể bạn đang dùng tài khoản Nhà Tuyển Dụng).");
+      } else {
+        alert(`Không thể lưu CV lên Server: ${errorMsg}`);
+      }
     } finally {
       setLoading(false);
     }

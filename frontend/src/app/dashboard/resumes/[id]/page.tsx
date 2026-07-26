@@ -32,9 +32,24 @@ export default function ViewResumePage() {
     const fetchResume = async () => {
       try {
         const res = await resumeApi.getById(resumeId);
-        setResume(res.data);
+        if (res.data) {
+          setResume(res.data);
+        } else {
+          throw new Error("Không có dữ liệu API");
+        }
       } catch (err) {
-        console.error("Lỗi lấy thông tin CV:", err);
+        console.error("Lỗi lấy thông tin CV từ API, kiểm tra nháp Local:", err);
+        // Ưu tiên đọc dữ liệu thật đã lưu nháp ở LocalStorage khi test
+        const localSaved = localStorage.getItem("user_cv_data");
+        if (localSaved) {
+          try {
+            const parsed = JSON.parse(localSaved);
+            setResume({
+              ...parsed.formData,
+              avatarUrl: parsed.avatarUrl
+            });
+          } catch (e) {}
+        }
       } finally {
         setLoading(false);
       }
@@ -44,31 +59,35 @@ export default function ViewResumePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-slate-600">
+      <div className="flex min-h-[60vh] items-center justify-center text-slate-600 font-medium">
         Đang tải thông tin CV...
       </div>
     );
   }
 
-  // Dữ liệu hiển thị (Lấy từ API hoặc dùng mặc định)
+  // Lấy dữ liệu thật từ API hoặc LocalStorage, KHÔNG DÙNG DỮ LIỆU GIẢ ĐỊNH HARDCODE
   const cvData = {
-    fullName: resume?.fullName || "Lan Duong",
-    jobTitle: resume?.jobTitle || "Lập trình viên Frontend (React/Next.js)",
-    email: resume?.email || "landuong.dev@gmail.com",
-    phoneNumber: resume?.phoneNumber || "0901 234 567",
-    location: resume?.location || "TP. Hồ Chí Minh",
-    bio: resume?.bio || "Hơn 2 năm kinh nghiệm phát triển ứng dụng web hiện đại. Mạnh về React, Next.js, TypeScript.",
-    skills: resume?.skills ? (Array.isArray(resume.skills) ? resume.skills.join(", ") : resume.skills) : "ReactJS, Next.js, TypeScript, Tailwind CSS",
-    languages: resume?.languages || "Tiếng Anh (TOEIC 750), Tiếng Việt (Bản ngữ)",
-    education: resume?.education || "Cử nhân Công nghệ Thông tin - Đại học HUFLIT (2023 - 2027)",
-    experience: resume?.experience || "Lập trình viên Frontend tại Công ty Công nghệ ABC (01/2024 - Hiện tại)",
-    projects: resume?.projects || "Dự án Web Tuyển Dụng Mini (01/2025 - 03/2025)",
-    awards: resume?.awards || "Học bổng Khuyến khích Học tập Học kỳ I (2024 - 2025)"
+    fullName: resume?.fullName || resume?.FullName || "Chưa cập nhật tên",
+    jobTitle: resume?.jobTitle || resume?.JobTitle || "Ứng viên",
+    email: resume?.email || resume?.Email || "Chưa cập nhật email",
+    phoneNumber: resume?.phoneNumber || resume?.PhoneNumber || "Chưa cập nhật SĐT",
+    location: resume?.location || resume?.Location || "Chưa cập nhật địa chỉ",
+    bio: resume?.bio || resume?.Bio || "",
+    skills: resume?.skills 
+      ? (Array.isArray(resume.skills) ? resume.skills.join(", ") : resume.skills) 
+      : (resume?.Skills ? (Array.isArray(resume.Skills) ? resume.Skills.join(", ") : resume.Skills) : ""),
+    languages: resume?.languages || resume?.Languages || "",
+    education: resume?.education || resume?.Education || "",
+    experience: resume?.experience || resume?.Experience || "",
+    projects: resume?.projects || resume?.Projects || "",
+    certificates: resume?.certificates || resume?.Certificates || "",
+    awards: resume?.awards || resume?.Awards || "",
+    avatarUrl: resume?.avatarUrl || resume?.AvatarUrl || resume?.avatar || null
   };
 
   return (
     <>
-      {/* CSS RESET DÙNG KHI IN PDF (Xóa hoàn toàn ngày giờ, header/footer trình duyệt) */}
+      {/* CSS RESET DÙNG KHI IN PDF (Loại bỏ lề, ngày giờ, đường link) */}
       <style jsx global>{`
         @media print {
           @page {
@@ -120,7 +139,7 @@ export default function ViewResumePage() {
           </button>
         </div>
 
-        {/* KHUNG HIỂN THỊ CV A4 ĐẸP CHUẨN KHI XEM VÀ IN */}
+        {/* KHUNG HIỂN THỊ CV A4 */}
         <div className="flex justify-center">
           <div
             ref={componentRef}
@@ -128,12 +147,23 @@ export default function ViewResumePage() {
           >
             {/* CỘT TRÁI CV */}
             <div className="flex w-[35%] flex-col gap-6 bg-slate-800 p-6 text-slate-100 print:bg-slate-800 print:text-white">
+              
+              {/* Ảnh đại diện hoặc Chữ cái đầu */}
               <div className="flex justify-center pt-2">
-                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-slate-600 bg-slate-700 text-4xl font-bold uppercase text-white shadow-md">
-                  {cvData.fullName.charAt(0)}
-                </div>
+                {cvData.avatarUrl ? (
+                  <img
+                    src={cvData.avatarUrl}
+                    alt="Avatar"
+                    className="h-28 w-28 rounded-full object-cover border-4 border-slate-600 shadow-md bg-white"
+                  />
+                ) : (
+                  <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-slate-600 bg-slate-700 text-4xl font-bold uppercase text-white shadow-md">
+                    {cvData.fullName ? cvData.fullName.charAt(0) : "CV"}
+                  </div>
+                )}
               </div>
 
+              {/* Thông tin liên hệ */}
               <section>
                 <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
                   Liên hệ
@@ -154,27 +184,45 @@ export default function ViewResumePage() {
                 </ul>
               </section>
 
-              <section>
-                <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
-                  Kỹ năng
-                </h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {cvData.skills.split(",").map((skill: string, idx: number) => (
-                    <span key={idx} className="rounded bg-slate-700 px-2 py-1 text-[11px] font-medium text-emerald-400">
-                      {skill.trim()}
-                    </span>
-                  ))}
-                </div>
-              </section>
+              {/* Kỹ năng */}
+              {cvData.skills && (
+                <section>
+                  <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
+                    Kỹ năng
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cvData.skills.split(",").map((skill: string, idx: number) => (
+                      <span key={idx} className="rounded bg-slate-700 px-2 py-1 text-[11px] font-medium text-emerald-400">
+                        {skill.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-              <section>
-                <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
-                  Ngoại ngữ
-                </h3>
-                <p className="text-xs leading-relaxed text-slate-200">
-                  {cvData.languages}
-                </p>
-              </section>
+              {/* Ngoại ngữ */}
+              {cvData.languages && (
+                <section>
+                  <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
+                    Ngoại ngữ
+                  </h3>
+                  <p className="text-xs leading-relaxed text-slate-200">
+                    {cvData.languages}
+                  </p>
+                </section>
+              )}
+
+              {/* Chứng chỉ */}
+              {cvData.certificates && (
+                <section>
+                  <h3 className="mb-3 border-b border-slate-600 pb-1 text-xs font-bold uppercase tracking-widest text-slate-300">
+                    Chứng chỉ
+                  </h3>
+                  <p className="text-xs leading-relaxed text-slate-200">
+                    {cvData.certificates}
+                  </p>
+                </section>
+              )}
             </div>
 
             {/* CỘT PHẢI CV */}
@@ -188,55 +236,65 @@ export default function ViewResumePage() {
                 </p>
               </header>
 
-              <section className="mb-6">
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
-                  <span className="h-4 w-1 bg-emerald-500"></span>
-                  Giới thiệu bản thân
-                </h3>
-                <p className="text-justify text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                  {cvData.bio}
-                </p>
-              </section>
+              {cvData.bio && (
+                <section className="mb-6">
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
+                    <span className="h-4 w-1 bg-emerald-500"></span>
+                    Giới thiệu bản thân
+                  </h3>
+                  <p className="text-justify text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
+                    {cvData.bio}
+                  </p>
+                </section>
+              )}
 
-              <section className="mb-6">
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
-                  <span className="h-4 w-1 bg-emerald-500"></span>
-                  Kinh nghiệm làm việc
-                </h3>
-                <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                  {cvData.experience}
-                </div>
-              </section>
+              {cvData.experience && (
+                <section className="mb-6">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
+                    <span className="h-4 w-1 bg-emerald-500"></span>
+                    Kinh nghiệm làm việc
+                  </h3>
+                  <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
+                    {cvData.experience}
+                  </div>
+                </section>
+              )}
 
-              <section className="mb-6">
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
-                  <span className="h-4 w-1 bg-emerald-500"></span>
-                  Dự án nổi bật
-                </h3>
-                <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                  {cvData.projects}
-                </div>
-              </section>
+              {cvData.projects && (
+                <section className="mb-6">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
+                    <span className="h-4 w-1 bg-emerald-500"></span>
+                    Dự án nổi bật
+                  </h3>
+                  <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
+                    {cvData.projects}
+                  </div>
+                </section>
+              )}
 
-              <section className="mb-6">
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
-                  <span className="h-4 w-1 bg-emerald-500"></span>
-                  Học vấn
-                </h3>
-                <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                  {cvData.education}
-                </div>
-              </section>
+              {cvData.education && (
+                <section className="mb-6">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
+                    <span className="h-4 w-1 bg-emerald-500"></span>
+                    Học vấn
+                  </h3>
+                  <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
+                    {cvData.education}
+                  </div>
+                </section>
+              )}
 
-              <section className="mb-6">
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
-                  <span className="h-4 w-1 bg-emerald-500"></span>
-                  Giải thưởng & Thành tích
-                </h3>
-                <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                  {cvData.awards}
-                </div>
-              </section>
+              {cvData.awards && (
+                <section className="mb-6">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900">
+                    <span className="h-4 w-1 bg-emerald-500"></span>
+                    Giải thưởng & Thành tích
+                  </h3>
+                  <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
+                    {cvData.awards}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>

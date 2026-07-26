@@ -97,7 +97,6 @@ export default function CreateResumePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 1. Tự động lấy dữ liệu nhập hoặc gán giá trị mặc định chuẩn để tránh bị gửi chuỗi rỗng ""
     const realFullName = formData.fullName.trim() || "Ứng Viên";
     const realTitle = formData.title.trim() || `CV của ${realFullName}`;
     const realEmail = formData.email.trim() || "ungvien@gmail.com";
@@ -108,30 +107,43 @@ export default function CreateResumePage() {
     localStorage.setItem("user_cv_data", JSON.stringify({ formData, avatarUrl }));
 
     try {
-      // 2. Chuẩn hóa Payload đảm bảo không trường nào bị rỗng làm hỏng Validation của .NET
+      // TUYỆT CHIÊU BAO LÔ: Gửi 1 lúc 2 định dạng (Cả chữ Hoa lẫn chữ Thường) 
+      // để trị dứt điểm cái tính kén chọn của Backend .NET
       const payload = {
+        // --- 1. Định dạng Viết Hoa (Dành cho .NET) ---
+        Title: realTitle,
+        FullName: realFullName,
+        Email: realEmail,
+        PhoneNumber: formData.phoneNumber.trim() || "0901234567",
+        Bio: formData.bio.trim() || "Chưa cập nhật giới thiệu",
+        JobTitle: formData.jobTitle.trim() || "Lập trình viên",
+        Location: formData.location.trim() || "TP. Hồ Chí Minh",
+        Languages: formData.languages.trim() || "Tiếng Việt",
+        Projects: formData.projects.trim() || "",
+        Certificates: formData.certificates.trim() || "",
+        Awards: formData.awards.trim() || "",
+        Skills: [], 
+        Experiences: [], 
+        Educations: [],
+
+        // --- 2. Định dạng Viết Thường (Chuẩn mặc định của Javascript) ---
         title: realTitle,
         fullName: realFullName,
         email: realEmail,
         phoneNumber: formData.phoneNumber.trim() || "0901234567",
-        bio: formData.bio.trim() || "Chưa cập nhật giới thiệu bản thân",
-        
+        bio: formData.bio.trim() || "Chưa cập nhật giới thiệu",
         jobTitle: formData.jobTitle.trim() || "Lập trình viên",
         location: formData.location.trim() || "TP. Hồ Chí Minh",
         languages: formData.languages.trim() || "Tiếng Việt",
         projects: formData.projects.trim() || "",
         certificates: formData.certificates.trim() || "",
         awards: formData.awards.trim() || "",
-
-        // Mảng Kỹ năng
-        skills: formData.skills 
-          ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) 
-          : ["React", "Next.js"],
+        skills: [],
         experiences: [], 
         educations: []
       };
 
-      console.log("Dữ liệu gửi lên API Backend:", payload);
+      console.log("Dữ liệu tuyệt đối an toàn gửi đi:", payload);
 
       await resumeApi.create(payload);
       
@@ -139,21 +151,15 @@ export default function CreateResumePage() {
       router.push("/jobs");
       
     } catch (error: any) {
-      console.error("Lỗi chi tiết khi lưu CV:", error);
-      
-      let errorDetails = "";
-      if (error.response?.data?.errors) {
-        errorDetails = JSON.stringify(error.response.data.errors, null, 2);
-      } else {
-        errorDetails = error.response?.data?.message || error.message || "Lỗi không xác định";
-      }
+      console.error("Lỗi chi tiết:", error);
+      let errorDetails = error.response?.data?.errors 
+        ? JSON.stringify(error.response.data.errors, null, 2) 
+        : (error.response?.data?.message || "Lỗi không xác định");
       
       if (error.response?.status === 401) {
         alert("Bạn chưa đăng nhập! Vui lòng đăng nhập với vai trò Ứng viên.");
-      } else if (error.response?.status === 403) {
-        alert("Tài khoản không có quyền tạo CV (Có thể bạn đang dùng tài khoản Nhà Tuyển Dụng).");
       } else {
-        alert(`Bị Backend từ chối (Lỗi 400). Chi tiết lỗi:\n\n${errorDetails}`);
+        alert(`Backend từ chối. Lỗi:\n\n${errorDetails}`);
       }
     } finally {
       setLoading(false);

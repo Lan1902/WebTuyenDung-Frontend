@@ -34,7 +34,7 @@ export default function CompaniesPage() {
 
   const filteredCompanies = companies.filter(company => {
     const matchesSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         company.industry.toLowerCase().includes(searchTerm.toLowerCase());
+                          company.industry.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesIndustry = !selectedIndustry || company.industry === selectedIndustry;
     const matchesLocation = !selectedLocation || company.location === selectedLocation;
     const matchesSize = !selectedSize || company.size === selectedSize;
@@ -50,11 +50,11 @@ export default function CompaniesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12 dark:from-blue-800 dark:to-blue-900">
+      {/* Header đã bỏ màu xanh, text tự động đổi màu theo theme */}
+      <div className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">{t('companies.viewAll')}</h1>
-          <p className="text-xl">{t('companies.description')}</p>
+          <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{t('companies.viewAll')}</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300">{t('companies.description')}</p>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ export default function CompaniesPage() {
             {filteredCompanies.map((company) => (
               <div
                 key={company.id}
-                className="card-surface p-6 hover:shadow-lg transition"
+                className="card-surface bg-white p-6 rounded-lg hover:shadow-lg transition"
               >
                 <div className="flex items-center mb-4">
                   <img
@@ -153,13 +153,15 @@ export default function CompaniesPage() {
                     }}
                   />
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{company.name}</h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">{company.industry}</p>
+                    {/* Bỏ các class dark:text-... để chữ luôn đậm trên nền trắng */}
+                    <h3 className="text-xl font-bold text-gray-900">{company.name}</h3>
+                    <p className="text-gray-600 font-medium text-sm">{company.industry}</p>
                   </div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">📍 {company.location}</p>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">👥 {company.size}</p>
-                <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 line-clamp-2">{company.description}</p>
+                {/* Đổi màu chữ sang xám đậm (gray-700/800) để nổi bật trên nền trắng */}
+                <p className="text-gray-700 text-sm mb-2">📍 {company.location}</p>
+                <p className="text-gray-700 text-sm mb-4">👥 {company.size}</p>
+                <p className="text-gray-800 text-sm mb-4 line-clamp-2">{company.description}</p>
                 <a
                   href={company.website}
                   target="_blank"

@@ -9,7 +9,7 @@ export default function CreateResumePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
-  // DỮ LIỆU GỐC ĐỂ TRỐNG HOÀN TOÀN
+  // DỮ LIỆU GỐC ĐỂ TRỐNG
   const [formData, setFormData] = useState({
     title: "",
     fullName: "",
@@ -27,6 +27,9 @@ export default function CreateResumePage() {
     awards: "",
   });
 
+  // State lưu trữ ảnh đại diện
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
   const componentRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -43,6 +46,18 @@ export default function CreateResumePage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Hàm xử lý khi người dùng chọn ảnh
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,7 +152,7 @@ export default function CreateResumePage() {
 
         <div className="container-page mx-auto grid gap-8 lg:grid-cols-[1.1fr_1.3fr] items-start">
           
-          {/* ================= CỘT TRÁI: FORM (SỬ DỤNG PLACEHOLDER) ================= */}
+          {/* ================= CỘT TRÁI: FORM ================= */}
           <div className="space-y-4 print-hidden">
             
             <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
@@ -145,6 +160,18 @@ export default function CreateResumePage() {
                 Thông tin cá nhân & Chức danh
               </h2>
               <div className="space-y-4">
+                
+                {/* NÚT TẢI ẢNH ĐẠI DIỆN MỚI THÊM VÀO */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Ảnh đại diện (Tùy chọn)</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 dark:file:bg-slate-700 dark:file:text-slate-300 cursor-pointer" 
+                  />
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tên bản CV (Quản lý)</label>
                   <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="VD: CV Frontend Developer" className="w-full input-base text-sm dark:bg-gray-700 dark:text-white" />
@@ -251,10 +278,19 @@ export default function CreateResumePage() {
             >
               <div className="flex w-[35%] flex-col gap-6 bg-slate-800 p-6 text-slate-100 print:bg-slate-800 print:text-white">
                 
+                {/* HIỂN THỊ AVATAR HOẶC VÒNG TRÒN MẶC ĐỊNH */}
                 <div className="flex justify-center pt-2">
-                  <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-slate-600 bg-slate-700 text-4xl font-bold uppercase text-white shadow-md">
-                    {formData.fullName ? formData.fullName.charAt(0) : "CV"}
-                  </div>
+                  {avatarUrl ? (
+                    <img 
+                      src={avatarUrl} 
+                      alt="Avatar" 
+                      className="h-28 w-28 rounded-full object-cover border-4 border-slate-600 shadow-md bg-white" 
+                    />
+                  ) : (
+                    <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-slate-600 bg-slate-700 text-4xl font-bold uppercase text-white shadow-md">
+                      {formData.fullName ? formData.fullName.charAt(0) : "CV"}
+                    </div>
+                  )}
                 </div>
 
                 <section>
@@ -347,7 +383,7 @@ export default function CreateResumePage() {
                     Dự án nổi bật
                   </h3>
                   <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-                    {formData.projects || "Dự án Web Tuyển Dụng Mini (06/2026 - 08/2026)\n- Xây dựng hệ thống tuyển dụng Fullstack với Next.js và MySQL Cloud.\n- Thiết kế tính năng tạo CV trực tuyến và xuất PDF chuẩn ATS."}
+                    {formData.projects || "Dự án Web Tuyển Dụng Mini (01/2025 - 03/2025)\n- Xây dựng hệ thống tuyển dụng Fullstack với Next.js và MySQL Cloud.\n- Thiết kế tính năng tạo CV trực tuyến và xuất PDF chuẩn ATS."}
                   </div>
                 </section>
 

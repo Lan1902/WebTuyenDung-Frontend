@@ -305,7 +305,8 @@ export default function JobsPage() {
                       <span className="chip">{job.experienceLevel}</span>
                     </div>
                     <h3 className="mt-4 text-xl font-bold text-slate-950">{job.title}</h3>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Công ty: {(job as any).companyName || 'Công ty chưa cập nhật tên'}</p>
+                    {/* Bỏ class dark:text-slate-300 ở thẻ <p> phía dưới */}
+                    <p className="mt-2 text-sm text-slate-600">Công ty: {(job as any).companyName || 'Công ty chưa cập nhật tên'}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span className="chip">{job.location}</span>
                       <span className="chip text-emerald-700">{formatSalary(job.salaryMin, job.salaryMax)}</span>

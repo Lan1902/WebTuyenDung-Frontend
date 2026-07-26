@@ -97,7 +97,6 @@ export default function CreateResumePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Kiểm tra xem đã nhập tên chưa
     if (!formData.fullName || !formData.email) {
       alert("Vui lòng nhập ít nhất Họ Tên và Email!");
       return;
@@ -105,38 +104,57 @@ export default function CreateResumePage() {
 
     setLoading(true);
 
-    // 1. Vẫn lưu dự phòng vào LocalStorage
+    // 1. Lưu dự phòng vào LocalStorage
     localStorage.setItem("user_cv_data", JSON.stringify({ formData, avatarUrl }));
 
-    // 2. Gửi dữ liệu thật lên Database
     try {
-      await resumeApi.create({
+      // 2. Gom dữ liệu gửi lên API (Đảm bảo chuẩn form)
+      const payload = {
         title: formData.title || `CV của ${formData.fullName}`,
         fullName: formData.fullName,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         bio: formData.bio || "",
-        // Nếu backend của bạn yêu cầu mảng, ta gửi mảng rỗng để tránh lỗi
+        
+        // Thêm các trường mở rộng
+        jobTitle: formData.jobTitle,
+        location: formData.location,
+        languages: formData.languages,
+        projects: formData.projects,
+        certificates: formData.certificates,
+        awards: formData.awards,
+
+        // Xử lý các trường Backend có thể yêu cầu là Mảng (Array)
+        skills: formData.skills ? formData.skills.split(",").map(s => s.trim()) : [],
         experiences: [], 
-        educations: [],
-        skills: []
-      });
+        educations: []
+      };
+
+      console.log("Dữ liệu gửi đi:", payload); // Log ra để kiểm tra
+
+      await resumeApi.create(payload);
       
-      alert("🎉 Lưu CV lên hệ thống thành công! Bây giờ bạn có thể đi ứng tuyển.");
-      router.push("/jobs"); // Chuyển thẳng ra trang tìm việc
+      alert("Lưu CV lên hệ thống thành công! Bây giờ bạn có thể đi ứng tuyển.");
+      router.push("/jobs");
       
     } catch (error: any) {
       console.error("Lỗi chi tiết khi lưu CV:", error);
       
-      // Bắt đúng lỗi từ Backend trả về để biết tại sao thất bại
-      const errorMsg = error.response?.data?.message || error.message || "Lỗi không xác định";
+      // Bóc tách lỗi 400 của .NET để xem chính xác nó chê trường dữ liệu nào
+      let errorDetails = "";
+      if (error.response?.data?.errors) {
+        // Lỗi do thiếu trường dữ liệu (Validation)
+        errorDetails = JSON.stringify(error.response.data.errors, null, 2);
+      } else {
+        errorDetails = error.response?.data?.message || error.message || "Sai định dạng dữ liệu";
+      }
       
       if (error.response?.status === 401) {
-        alert("Bạn chưa đăng nhập! Vui lòng đăng nhập với vai trò Ứng viên trước khi lưu CV.");
+        alert("Bạn chưa đăng nhập! Vui lòng đăng nhập với vai trò Ứng viên.");
       } else if (error.response?.status === 403) {
-        alert("Tài khoản của bạn không có quyền tạo CV (Có thể bạn đang dùng tài khoản Nhà Tuyển Dụng).");
+        alert("Tài khoản của bạn không có quyền tạo CV (Có thể đang dùng tài khoản Nhà Tuyển Dụng).");
       } else {
-        alert(`Không thể lưu CV lên Server: ${errorMsg}`);
+        alert(`Bị Backend từ chối (Lỗi 400). Chi tiết lỗi từ máy chủ:\n\n${errorDetails}`);
       }
     } finally {
       setLoading(false);

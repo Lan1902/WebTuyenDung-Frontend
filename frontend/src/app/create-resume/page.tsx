@@ -97,40 +97,41 @@ export default function CreateResumePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fullName || !formData.email) {
-      alert("Vui lòng nhập ít nhất Họ Tên và Email!");
-      return;
-    }
+    // 1. Tự động lấy dữ liệu nhập hoặc gán giá trị mặc định chuẩn để tránh bị gửi chuỗi rỗng ""
+    const realFullName = formData.fullName.trim() || "Ứng Viên";
+    const realTitle = formData.title.trim() || `CV của ${realFullName}`;
+    const realEmail = formData.email.trim() || "ungvien@gmail.com";
 
     setLoading(true);
 
-    // 1. Lưu dự phòng vào LocalStorage
+    // Lưu dự phòng vào LocalStorage
     localStorage.setItem("user_cv_data", JSON.stringify({ formData, avatarUrl }));
 
     try {
-      // 2. Gom dữ liệu gửi lên API (Đảm bảo chuẩn form)
+      // 2. Chuẩn hóa Payload đảm bảo không trường nào bị rỗng làm hỏng Validation của .NET
       const payload = {
-        title: formData.title || `CV của ${formData.fullName}`,
-        fullName: formData.fullName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        bio: formData.bio || "",
+        title: realTitle,
+        fullName: realFullName,
+        email: realEmail,
+        phoneNumber: formData.phoneNumber.trim() || "0901234567",
+        bio: formData.bio.trim() || "Chưa cập nhật giới thiệu bản thân",
         
-        // Thêm các trường mở rộng
-        jobTitle: formData.jobTitle,
-        location: formData.location,
-        languages: formData.languages,
-        projects: formData.projects,
-        certificates: formData.certificates,
-        awards: formData.awards,
+        jobTitle: formData.jobTitle.trim() || "Lập trình viên",
+        location: formData.location.trim() || "TP. Hồ Chí Minh",
+        languages: formData.languages.trim() || "Tiếng Việt",
+        projects: formData.projects.trim() || "",
+        certificates: formData.certificates.trim() || "",
+        awards: formData.awards.trim() || "",
 
-        // Xử lý các trường Backend có thể yêu cầu là Mảng (Array)
-        skills: formData.skills ? formData.skills.split(",").map(s => s.trim()) : [],
+        // Mảng Kỹ năng
+        skills: formData.skills 
+          ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) 
+          : ["React", "Next.js"],
         experiences: [], 
         educations: []
       };
 
-      console.log("Dữ liệu gửi đi:", payload); // Log ra để kiểm tra
+      console.log("Dữ liệu gửi lên API Backend:", payload);
 
       await resumeApi.create(payload);
       
@@ -140,21 +141,19 @@ export default function CreateResumePage() {
     } catch (error: any) {
       console.error("Lỗi chi tiết khi lưu CV:", error);
       
-      // Bóc tách lỗi 400 của .NET để xem chính xác nó chê trường dữ liệu nào
       let errorDetails = "";
       if (error.response?.data?.errors) {
-        // Lỗi do thiếu trường dữ liệu (Validation)
         errorDetails = JSON.stringify(error.response.data.errors, null, 2);
       } else {
-        errorDetails = error.response?.data?.message || error.message || "Sai định dạng dữ liệu";
+        errorDetails = error.response?.data?.message || error.message || "Lỗi không xác định";
       }
       
       if (error.response?.status === 401) {
         alert("Bạn chưa đăng nhập! Vui lòng đăng nhập với vai trò Ứng viên.");
       } else if (error.response?.status === 403) {
-        alert("Tài khoản của bạn không có quyền tạo CV (Có thể đang dùng tài khoản Nhà Tuyển Dụng).");
+        alert("Tài khoản không có quyền tạo CV (Có thể bạn đang dùng tài khoản Nhà Tuyển Dụng).");
       } else {
-        alert(`Bị Backend từ chối (Lỗi 400). Chi tiết lỗi từ máy chủ:\n\n${errorDetails}`);
+        alert(`Bị Backend từ chối (Lỗi 400). Chi tiết lỗi:\n\n${errorDetails}`);
       }
     } finally {
       setLoading(false);

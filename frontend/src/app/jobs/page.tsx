@@ -312,9 +312,6 @@ export default function JobsPage() {
                       <span className="chip text-emerald-700">{formatSalary(job.salaryMin, job.salaryMax)}</span>
                     </div>
                   </div>
-                  <div className="rounded-2xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white">
-                    {job.applicationsCount} CV
-                  </div>
                 </div>
 
                 <p className="mt-5 line-clamp-3 text-sm leading-6 text-slate-600">{job.description}</p>
